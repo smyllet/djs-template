@@ -4,6 +4,7 @@ import * as winston from "winston";
 
 // Chargement des Agents
 import ConfigAgent from "./Agents/ConfigAgent";
+import CommandManagerAgent from "./Agents/CommandManagerAgent";
 
 // Chargement et configuration du logger
 winston.add(new winston.transports.Console({
@@ -17,6 +18,9 @@ winston.add(new winston.transports.Console({
 
 // Chargement de la configuration
 ConfigAgent.loadConfig();
+
+// Chargement des commandes
+CommandManagerAgent.importCommands();
 
 // Création du client Discord
 const client = new Discord.Client({
@@ -33,6 +37,13 @@ const client = new Discord.Client({
 client.on('ready', () => {
     winston.info(`Logged in as ${client.user!.tag} on ${client.guilds.cache.size} servers : ${client.guilds.cache.map(g => g.name).join(', ')}`);
 });
+
+// Lorsque le client reçois une interaction
+client.on('interactionCreate', async interaction => {
+    if(interaction instanceof Discord.CommandInteraction) {
+        CommandManagerAgent.runCommand(interaction);
+    }
+})
 
 // Connexion au client Discord
 client.login(ConfigAgent.getConfig().discord.token).then(() => {winston.info('Logged in on Discord')});
