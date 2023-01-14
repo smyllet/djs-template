@@ -52,11 +52,14 @@ export default new MainCommand({
 
                         ConfigAgent.loadConfig()
 
+                        console.log(ConfigAgent.getConfig().discord.activity);
+
                         // change client status
-                        interaction.client.user?.setPresence({
+                        interaction.client.user.setPresence({
                             activities: [
                                 {
-                                    name: "with " + interaction.client.guilds.cache.size + " servers",
+                                    name: ConfigAgent.getConfig().discord.activity.name,
+                                    type: ConfigAgent.getConfig().discord.activity.type
                                 }
                             ],
                         })

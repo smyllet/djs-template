@@ -36,6 +36,14 @@ const client = new Discord.Client({
 // Lorsque le client est prêt
 client.on('ready', () => {
     winston.info(`Logged in as ${client.user!.tag} on ${client.guilds.cache.size} servers : ${client.guilds.cache.map(g => g.name).join(', ')}`);
+    client.user?.setPresence({
+        activities: [
+            {
+                name: ConfigAgent.getConfig().discord.activity.name,
+                type: ConfigAgent.getConfig().discord.activity.type
+            }
+        ]
+    });
 });
 
 // En cas d'erreur

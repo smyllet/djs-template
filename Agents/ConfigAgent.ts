@@ -6,6 +6,10 @@ export default class ConfigAgent {
     private static config: {
         discord: {
             token: string;
+            activity: {
+                name: string;
+                type: number;
+            };
         },
         commands: {
             defaultLocale: string;
@@ -18,7 +22,9 @@ export default class ConfigAgent {
             fs.writeFileSync('.env',
                 '# Configuration de l\'application'
                 + '\nDISCORD_TOKEN=YOUR_TOKEN_HERE'
-                + '\nCOMMAND_DEFAULT_LOCALE=en-US'
+                + '\nDISCORD_ACTIVITY=YOUR_ACTIVITY_HERE'
+                + '\nDISCORD_ACTIVITY_TYPE=YOUR_ACTIVITY_TYPE_HERE'
+                + '\nCOMMAND_DEFAULT_LOCALE=en-GB'
             );
             console.log('Please fill the .env file and restart the application.');
             process.exit(0);
@@ -29,6 +35,10 @@ export default class ConfigAgent {
         // check if all required env variables are set
         if (!process.env.DISCORD_TOKEN) {
             throw new Error('DISCORD_TOKEN not set');
+        } else if (!process.env.DISCORD_ACTIVITY) {
+            throw new Error('DISCORD_ACTIVITY not set');
+        } else if (!process.env.DISCORD_ACTIVITY_TYPE) {
+            throw new Error('DISCORD_ACTIVITY_TYPE not set');
         } else if (!process.env.COMMAND_DEFAULT_LOCALE) {
             throw new Error('COMMAND_DEFAULT_LOCALE not set');
         }
@@ -38,6 +48,10 @@ export default class ConfigAgent {
         this.config = {
             discord: {
                 token: process.env.DISCORD_TOKEN,
+                activity: {
+                    name: process.env.DISCORD_ACTIVITY,
+                    type: parseInt(process.env.DISCORD_ACTIVITY_TYPE)
+                }
             },
             commands: {
                 defaultLocale: process.env.COMMAND_DEFAULT_LOCALE,
