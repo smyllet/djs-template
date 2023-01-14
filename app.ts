@@ -38,6 +38,11 @@ client.on('ready', () => {
     winston.info(`Logged in as ${client.user!.tag} on ${client.guilds.cache.size} servers : ${client.guilds.cache.map(g => g.name).join(', ')}`);
 });
 
+// En cas d'erreur
+client.on('error', (error) => {
+    winston.error(error);
+});
+
 // Lorsque le client reçois une interaction
 client.on('interactionCreate', async interaction => {
     if(interaction instanceof Discord.ChatInputCommandInteraction) {

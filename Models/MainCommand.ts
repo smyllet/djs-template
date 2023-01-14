@@ -1,22 +1,24 @@
 import SubCommand from "./SubCommand";
 import SubCommandGroup from "./SubCommandGroup";
-import {CommandInteraction, SlashCommandBuilder} from "discord.js";
+import {CommandInteraction, SlashCommandBuilder, PermissionsBitField} from "discord.js";
 import {LocaleString} from 'discord-api-types/v10';
 import CommandDescription from "./CommandDescription";
 import ConfigAgent from "../Agents/ConfigAgent";
 import * as winston from "winston";
 
 export default class MainCommand extends SubCommand {
+    readonly adminOnly: boolean;
     readonly subCommandGroups?: SubCommandGroup[];
     readonly subCommands?: SubCommand[];
 
-    constructor(settings: {name: string, description: CommandDescription[], enabled: boolean, execute?: (interaction: CommandInteraction) => Promise<void>, subCommandGroups?: SubCommandGroup[], subCommands?: SubCommand[]}) {
+    constructor(settings: {name: string, description: CommandDescription[], enabled: boolean, execute?: (interaction: CommandInteraction) => Promise<void>, adminOnly?: boolean, subCommandGroups?: SubCommandGroup[], subCommands?: SubCommand[]}) {
         super({
             name: settings.name,
             description: settings.description,
             enabled: settings.enabled,
             execute: settings.execute
         });
+        this.adminOnly = settings.adminOnly ?? false;
         this.subCommandGroups = settings.subCommandGroups;
         this.subCommands = settings.subCommands;
     }
@@ -25,6 +27,10 @@ export default class MainCommand extends SubCommand {
         let data = new SlashCommandBuilder();
 
         data.setName(this.name);
+
+        if(this.adminOnly) {
+            data.setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator);
+        }
 
         this.description.forEach(d => {
             if(d.isLocale(ConfigAgent.getConfig().commands.defaultLocale as LocaleString)) {

@@ -18,6 +18,7 @@ export default new MainCommand({
         })
     ],
     enabled: true,
+    adminOnly: true,
     subCommandGroups: [
         new SubCommandGroup({
             name: "config",
