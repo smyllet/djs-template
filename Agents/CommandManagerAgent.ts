@@ -1,7 +1,8 @@
 import * as fs from "fs";
 import MainCommand from "../Models/MainCommand";
 import * as winston from "winston";
-import {CommandInteraction} from "discord.js";
+import {ChatInputCommandInteraction, CommandInteraction} from "discord.js";
+import SubCommand from "../Models/SubCommand";
 
 export default class CommandManagerAgent {
     private static _commands: MainCommand[] = [];
@@ -25,18 +26,42 @@ export default class CommandManagerAgent {
         return this._commands;
     }
 
-    static runCommand(commandInteraction: CommandInteraction): void {
+    static async runCommand(commandInteraction: ChatInputCommandInteraction) {
         winston.debug(`Command ${commandInteraction.commandName} received`);
         let command = this.commands.find(c => c.name === commandInteraction.commandName);
+        if(command) {
+            if(command.enabled) {
+                let subCommandName = commandInteraction.options.getSubcommand(false);
 
-        if(command != undefined) {
-            if(command.execute) {
-                command.execute(commandInteraction).then(r => {
-                    winston.debug(`Command ${commandInteraction.commandName} executed`);
-                }).catch(e => {
-                    winston.error(e);
-                });
-            }
-        }
+                if(subCommandName) {
+                    let subCommandGroupName = commandInteraction.options.getSubcommandGroup(false);
+                    let subCommand: SubCommand | undefined;
+
+                    if(subCommandGroupName) {
+                        let subCommandGroup = command.subCommandGroups?.find(c => c.name === subCommandGroupName);
+
+                        if(subCommandGroup) {
+                            if(subCommandGroup.enabled) {
+                                subCommand = subCommandGroup.subCommands.find(c => c.name === subCommandName);
+                            } else await commandInteraction.reply({content: "Command is disabled", ephemeral: true});
+                        } else await commandInteraction.reply({content: "Command not found", ephemeral: true});
+                    } else {
+                        subCommand = command.subCommands?.find(c => c.name === subCommandName);
+                    }
+
+                    if(subCommand) {
+                        if(subCommand.enabled) {
+                            if(subCommand.execute) {
+                                await subCommand.execute(commandInteraction);
+                            } else await commandInteraction.reply({content: "Command is not implemented", ephemeral: true});
+                        } else await commandInteraction.reply({content: "Command is disabled", ephemeral: true});
+                    } else await commandInteraction.reply({content: "Command not found", ephemeral: true});
+                } else {
+                    if(command.execute) {
+                        await command.execute(commandInteraction);
+                    } else await commandInteraction.reply({content: "Command is not implemented", ephemeral: true});
+                }
+            } else await commandInteraction.reply({content: "Command is disabled", ephemeral: true});
+        } else await commandInteraction.reply({content: "Command not found", ephemeral: true});
     }
 }

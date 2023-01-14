@@ -25,40 +25,19 @@ let config = ConfigAgent.getConfig();
 // Login to Discord
 const discordRest = new REST({version: '10'}).setToken(config.discord.token);
 
-let slashCommandsData: SlashCommandBuilder[] = [];
+
 CommandManagerAgent.importCommands();
-CommandManagerAgent.commands.forEach(command => {
-    const data = new SlashCommandBuilder()
-        .setName(command.name);
 
-    command.description.forEach(description => {
-        if(description.locale instanceof Array) {
-            description.locale.forEach(locale => {
-                data.setDescriptionLocalization(locale, description.description);
-                if(locale === config.commands.defaultLocale) {
-                    data.setDescription(description.description);
-                }
-            });
-        } else {
-            data.setDescriptionLocalization(description.locale, description.description);
-            if(description.locale === config.commands.defaultLocale) {
-                data.setDescription(description.description);
-            }
-        }
-    });
+try {
+    let slashCommandsData: SlashCommandBuilder[] = CommandManagerAgent.commands.map(command => command.slashCommandData);
 
-    if(data.description == undefined) winston.error('Command ' + command.name + ' : description pour la langue par défaut (' + config.commands.defaultLocale + ') non trouvée');
-    else {
-        slashCommandsData.push(data);
-        winston.debug(`Command ${command.name} ajoutée`);
-    }
-})
-
-discordRest.get(Routes.user()).then((user: any) => {
-    discordRest.put(Routes.applicationCommands(user.id), {body: slashCommandsData.map(c => c.toJSON())}).then(() => {
-        winston.info('Slash commands generated');
-    }).catch((error) => {
-        winston.error(error);
+    discordRest.get(Routes.user()).then((user: any) => {
+        discordRest.put(Routes.applicationCommands(user.id), {body: slashCommandsData.map(c => c.toJSON())}).then(() => {
+            winston.info('Slash commands generated');
+        }).catch((error) => {
+            winston.error(error);
+        })
     })
-})
-
+} catch (error) {
+    winston.error(error);
+}

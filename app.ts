@@ -40,8 +40,8 @@ client.on('ready', () => {
 
 // Lorsque le client reçois une interaction
 client.on('interactionCreate', async interaction => {
-    if(interaction instanceof Discord.CommandInteraction) {
-        CommandManagerAgent.runCommand(interaction);
+    if(interaction instanceof Discord.ChatInputCommandInteraction) {
+        await CommandManagerAgent.runCommand(interaction);
     }
 })
 
