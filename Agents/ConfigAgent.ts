@@ -1,10 +1,11 @@
 import * as fs from "fs";
 import * as winston from "winston";
+import * as yaml from "yaml";
+import * as dotenv from "dotenv";
 
 export default class ConfigAgent {
     private static config: {
         discord: {
-            token: string;
             activity: {
                 name: string;
                 type: number;
@@ -16,49 +17,81 @@ export default class ConfigAgent {
     };
 
     static loadConfig() {
-        // Create .env file if not exists
-        if(!fs.existsSync('.env')) {
-            fs.writeFileSync('.env',
-                '# Configuration de l\'application'
-                + '\nDISCORD_TOKEN=YOUR_TOKEN_HERE'
-                + '\nDISCORD_ACTIVITY=YOUR_ACTIVITY_HERE'
-                + '\nDISCORD_ACTIVITY_TYPE=YOUR_ACTIVITY_TYPE_HERE'
-                + '\nCOMMAND_DEFAULT_LOCALE=en-GB'
-            );
-            console.log('Please fill the .env file and restart the application.');
-            process.exit(0);
-        }
+        winston.info("Loading configuration...");
 
-        fs.readFileSync('.env', 'utf8').split(/\r?\n/).forEach((line) => {
-            if(line.startsWith('#') || line === '') return;
-            let split = line.split('=');
-            let key = split[0].trim();
-            process.env[key] = split[1].split('#')[0].trim();
-        });
+        /* Checking environment variables */
+        let envValid = true;
 
-        // check if all required env variables are set
+        dotenv.config();
         if (!process.env.DISCORD_TOKEN) {
-            throw new Error('DISCORD_TOKEN not set');
-        } else if (!process.env.DISCORD_ACTIVITY) {
-            throw new Error('DISCORD_ACTIVITY not set');
-        } else if (!process.env.DISCORD_ACTIVITY_TYPE) {
-            throw new Error('DISCORD_ACTIVITY_TYPE not set');
-        } else if (!process.env.COMMAND_DEFAULT_LOCALE) {
-            throw new Error('COMMAND_DEFAULT_LOCALE not set');
+            winston.error("Missing DISCORD_TOKEN environment variable");
+            envValid = false;
         }
 
+        if(!envValid) {
+            winston.error('Missing environment variables, please add on execution or in a .env file');
+            process.exit(1);
+        }
+
+        winston.debug("Environment variables checked");
+
+        /* creating config.yml if it doesn't exist */
+        if(!fs.existsSync('./config.yml')) {
+            winston.info("Creating config.yml...");
+            fs.writeFileSync('./config.yml', yaml.stringify({
+                discord: {
+                    activity: {
+                        name: "with your feelings",
+                        type: 0
+                    }
+                },
+                commands: {
+                    defaultLocale: "en-GB"
+                }
+            }));
+            winston.warn("config.yml created, please fill it with your own values and restart the bot");
+            process.exit(1);
+        }
+
+        /* Loading configuration file */
+        let confValid = true;
+
+        let yamlConf = yaml.parse(fs.readFileSync('config.yml', 'utf8'))
+        if(!yamlConf) {
+            winston.error('Error while parsing config.yml');
+            confValid = false;
+        } else {
+            if(!yamlConf.discord?.activity?.name) {
+                winston.error('No activity name found in config.yml (discord.activity.name)');
+                confValid = false;
+            }
+            if(yamlConf.discord?.activity?.type === null || yamlConf.discord?.activity?.type === undefined) {
+                winston.error('No activity type found in config.yml (discord.activity.type)');
+                confValid = false;
+            }
+            if(!yamlConf.commands?.defaultLocale) {
+                winston.error('No default locale found in config.yml (commands.defaultLocale)');
+                confValid = false;
+            }
+        }
+
+        if(!confValid) {
+            winston.error('Please fix the errors in config.yml and restart the application.');
+            process.exit(1);
+        }
+
+        winston.debug("Configuration file checked");
 
         // set config
         this.config = {
             discord: {
-                token: process.env.DISCORD_TOKEN,
                 activity: {
-                    name: process.env.DISCORD_ACTIVITY,
-                    type: parseInt(process.env.DISCORD_ACTIVITY_TYPE)
+                    name: yamlConf.discord.activity.name,
+                    type: yamlConf.discord.activity.type
                 }
             },
             commands: {
-                defaultLocale: process.env.COMMAND_DEFAULT_LOCALE,
+                defaultLocale: yamlConf.commands.defaultLocale,
             }
         };
 

@@ -59,4 +59,4 @@ client.on('interactionCreate', async interaction => {
 })
 
 // Connexion au client Discord
-client.login(ConfigAgent.getConfig().discord.token).then(() => {winston.info('Logged in on Discord')});
+client.login(process.env.DISCORD_TOKEN).then(() => {winston.info('Logged in on Discord')});
