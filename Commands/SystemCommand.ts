@@ -50,9 +50,7 @@ export default new MainCommand({
                     execute: async (interaction: CommandInteraction) => {
                         await interaction.reply({content: "Reloading configuration...", ephemeral: true});
 
-                        ConfigAgent.loadConfig()
-
-                        console.log(ConfigAgent.getConfig().discord.activity);
+                        ConfigAgent.loadConfig();
 
                         // change client status
                         interaction.client.user.setPresence({
@@ -62,7 +60,7 @@ export default new MainCommand({
                                     type: ConfigAgent.getConfig().discord.activity.type
                                 }
                             ],
-                        })
+                        });
 
                         await interaction.editReply({content: "Configuration reloaded"});
                     }

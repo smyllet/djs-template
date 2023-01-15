@@ -1,4 +1,3 @@
-import * as dotenv from 'dotenv';
 import * as fs from "fs";
 import * as winston from "winston";
 
@@ -30,7 +29,12 @@ export default class ConfigAgent {
             process.exit(0);
         }
 
-        dotenv.config();
+        fs.readFileSync('.env', 'utf8').split(/\r?\n/).forEach((line) => {
+            if(line.startsWith('#') || line === '') return;
+            let split = line.split('=');
+            let key = split[0].trim();
+            process.env[key] = split[1].split('#')[0].trim();
+        });
 
         // check if all required env variables are set
         if (!process.env.DISCORD_TOKEN) {
