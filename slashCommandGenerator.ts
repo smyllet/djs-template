@@ -23,7 +23,7 @@ ConfigAgent.loadConfig();
 let config = ConfigAgent.getConfig();
 
 // Login to Discord
-const discordRest = new REST({version: '10'}).setToken(config.discord.token);
+const discordRest = new REST({version: '10'}).setToken(process.env.DISCORD_TOKEN!);
 
 
 CommandManagerAgent.importCommands();

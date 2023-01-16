@@ -23,7 +23,7 @@ ConfigAgent.loadConfig();
 let config = ConfigAgent.getConfig();
 
 // Login to Discord
-const discordRest = new REST({version: '10'}).setToken(config.discord.token);
+const discordRest = new REST({version: '10'}).setToken(process.env.DISCORD_TOKEN!);
 
 discordRest.get(Routes.user()).then((user: any) => {
     discordRest.get(Routes.applicationCommands(user.id))

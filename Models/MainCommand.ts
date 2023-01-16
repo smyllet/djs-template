@@ -32,6 +32,8 @@ export default class MainCommand extends SubCommand {
             data.setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator);
         }
 
+        data.setDMPermission(false);
+
         this.description.forEach(d => {
             if(d.isLocale(ConfigAgent.getConfig().commands.defaultLocale as LocaleString)) {
                 data.setDescription(d.description);
