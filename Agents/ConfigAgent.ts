@@ -101,4 +101,23 @@ export default class ConfigAgent {
     static getConfig() {
         return this.config;
     }
+
+    private static editConfig(fn: (config: any) => any) {
+        let yamlConf = yaml.parse(fs.readFileSync('config.yml', 'utf8'))
+        if(!yamlConf) {
+            winston.error('Error while parsing config.yml');
+        } else {
+            let newConfig = fn(yamlConf);
+            fs.writeFileSync('./config.yml', yaml.stringify(newConfig));
+            this.loadConfig();
+        }
+    }
+
+    static setActivity(name: string, type: number) {
+        this.editConfig((config) => {
+            config.discord.activity.name = name;
+            config.discord.activity.type = type;
+            return config;
+        });
+    }
 }

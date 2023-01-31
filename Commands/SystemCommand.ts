@@ -1,20 +1,21 @@
-import {CommandInteraction} from "discord.js";
+import {ActivityType, CommandInteraction} from "discord.js";
 import MainCommand from "../Models/MainCommand";
-import CommandDescription from "../Models/CommandDescription";
+import LocaleText from "../Models/LocaleText";
 import SubCommandGroup from "../Models/SubCommandGroup";
 import SubCommand from "../Models/SubCommand";
 import ConfigAgent from "../Agents/ConfigAgent";
+import {StringCommandOption} from "../Models/CommandOption";
 
 export default new MainCommand({
     name: "system",
     description: [
-        new CommandDescription({
+        new LocaleText({
             locale: "fr",
-            description: "Gérer les fonctionnalités du bot"
+            text: "Gérer les fonctionnalités du bot"
         }),
-        new CommandDescription({
+        new LocaleText({
             locale: ["en-GB", "en-US"],
-            description: "Manage the bot's features"
+            text: "Manage the bot's features"
         })
     ],
     enabled: true,
@@ -23,13 +24,13 @@ export default new MainCommand({
         new SubCommandGroup({
             name: "config",
             description: [
-                new CommandDescription({
+                new LocaleText({
                     locale: "fr",
-                    description: "Gérer la configuration du bot"
+                    text: "Gérer la configuration du bot"
                 }),
-                new CommandDescription({
+                new LocaleText({
                     locale: ["en-GB", "en-US"],
-                    description: "Manage the bot's configuration"
+                    text: "Manage the bot's configuration"
                 })
             ],
             enabled: true,
@@ -37,13 +38,13 @@ export default new MainCommand({
                 new SubCommand({
                     name: "reload",
                     description: [
-                        new CommandDescription({
+                        new LocaleText({
                             locale: "fr",
-                            description: "Recharger la configuration du bot"
+                            text: "Recharger la configuration du bot"
                         }),
-                        new CommandDescription({
+                        new LocaleText({
                             locale: ["en-GB", "en-US"],
-                            description: "Reload the bot's configuration"
+                            text: "Reload the bot's configuration"
                         })
                     ],
                     enabled: true,
@@ -63,6 +64,156 @@ export default new MainCommand({
                         });
 
                         await interaction.editReply({content: "Configuration reloaded"});
+                    }
+                })
+            ]
+        }),
+        new SubCommandGroup({
+            name: "activity",
+            description: [
+                new LocaleText({
+                    locale: "fr",
+                    text: "Gérer l'activité du bot"
+                }),
+                new LocaleText({
+                    locale: ["en-GB", "en-US"],
+                    text: "Manage the bot's activity"
+                })
+            ],
+            enabled: true,
+            subCommands: [
+                new SubCommand({
+                    name: "set",
+                    description: [
+                        new LocaleText({
+                            locale: "fr",
+                            text: "Définir l'activité du bot"
+                        }),
+                        new LocaleText({
+                            locale: ["en-GB", "en-US"],
+                            text: "Set the bot's activity"
+                        })
+                    ],
+                    enabled: true,
+                    options: [
+                        new StringCommandOption({
+                            name: "type",
+                            description: [
+                                new LocaleText({
+                                    locale: "fr",
+                                    text: "Le type de l'activité"
+                                }),
+                                new LocaleText({
+                                    locale: ["en-GB", "en-US"],
+                                    text: "The activity's type"
+                                })
+                            ],
+                            required: true,
+                            choices: [
+                                {
+                                    name: [
+                                        new LocaleText({
+                                            locale: "fr",
+                                            text: "Joue"
+                                        }),
+                                        new LocaleText({
+                                            locale: ["en-GB", "en-US"],
+                                            text: "Playing"
+                                        })
+                                    ],
+                                    value: "PLAYING"
+                                },
+                                {
+                                    name: [
+                                        new LocaleText({
+                                            locale: "fr",
+                                            text: "Regarde"
+                                        }),
+                                        new LocaleText({
+                                            locale: ["en-GB", "en-US"],
+                                            text: "Watching"
+                                        })
+                                    ],
+                                    value: "WATCHING"
+                                },
+                                {
+                                    name: [
+                                        new LocaleText({
+                                            locale: "fr",
+                                            text: "Écoute"
+                                        }),
+                                        new LocaleText({
+                                            locale: ["en-GB", "en-US"],
+                                            text: "Listening"
+                                        })
+                                    ],
+                                    value: "LISTENING"
+                                },
+                                {
+                                    name: [
+                                        new LocaleText({
+                                            locale: "fr",
+                                            text: "Participe"
+                                        }),
+                                        new LocaleText({
+                                            locale: ["en-GB", "en-US"],
+                                            text: "Competing"
+                                        })
+                                    ],
+                                    value: "COMPETING"
+                                }
+                            ]
+                        }),
+                        new StringCommandOption({
+                            name: "name",
+                            description: [
+                                new LocaleText({
+                                    locale: "fr",
+                                    text: "Le nom de l'activité"
+                                }),
+                                new LocaleText({
+                                    locale: ["en-GB", "en-US"],
+                                    text: "The activity's name"
+                                })
+                            ],
+                            required: true,
+                        })
+                    ],
+                    execute: async (interaction: CommandInteraction) => {
+                        await interaction.reply({content: "Setting activity...", ephemeral: true});
+
+                        let activityName = interaction.options.get("name")!.value as string;
+                        let activityType = interaction.options.get("type")!.value as string;
+                        let activityTypeNumber = 0;
+
+                        switch (activityType) {
+                            case "PLAYING":
+                                activityTypeNumber = ActivityType.Playing;
+                                break;
+                            case "WATCHING":
+                                activityTypeNumber = ActivityType.Watching;
+                                break;
+                            case "LISTENING":
+                                activityTypeNumber = ActivityType.Listening;
+                                break;
+                            case "COMPETING":
+                                activityTypeNumber = ActivityType.Competing;
+                                break;
+                        }
+
+                        ConfigAgent.setActivity(activityName, activityTypeNumber);
+
+                        // change client status
+                        interaction.client.user.setPresence({
+                            activities: [
+                                {
+                                    name: ConfigAgent.getConfig().discord.activity.name,
+                                    type: ConfigAgent.getConfig().discord.activity.type
+                                }
+                            ],
+                        });
+
+                        await interaction.editReply({content: "Activity set"});
                     }
                 })
             ]

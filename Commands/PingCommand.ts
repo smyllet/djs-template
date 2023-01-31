@@ -1,17 +1,17 @@
 import {CommandInteraction} from "discord.js";
 import MainCommand from "../Models/MainCommand";
-import CommandDescription from "../Models/CommandDescription";
+import LocaleText from "../Models/LocaleText";
 
 export default new MainCommand({
     name: "ping",
     description: [
-        new CommandDescription({
+        new LocaleText({
             locale: "fr",
-            description: "Afficher la latence du Bot et de l'API Discord"
+            text: "Afficher la latence du Bot et de l'API Discord"
         }),
-        new CommandDescription({
+        new LocaleText({
             locale: ["en-GB", "en-US"],
-            description: "Display the Bot and Discord API latency"
+            text: "Display the Bot and Discord API latency"
         })
     ],
     enabled: true,
