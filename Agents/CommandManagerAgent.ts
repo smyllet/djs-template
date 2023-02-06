@@ -1,9 +1,10 @@
 import * as fs from "fs";
 import MainCommand from "../Models/MainCommand";
 import * as winston from "winston";
-import {ChatInputCommandInteraction, CommandInteraction} from "discord.js";
+import {AutocompleteInteraction, ChatInputCommandInteraction} from "discord.js";
 import SubCommand from "../Models/SubCommand";
 import Language from "../Languages/Language";
+import {StringCommandOption} from "../Models/CommandOption";
 
 export default class CommandManagerAgent {
     private static _commands: MainCommand[] = [];
@@ -67,5 +68,36 @@ export default class CommandManagerAgent {
                 }
             } else await commandInteraction.reply({content: language.commandNotEnabled, ephemeral: true});
         } else await commandInteraction.reply({content: language.commandNotFound, ephemeral: true});
+    }
+
+    static runAutocomplete(interaction: AutocompleteInteraction) {
+        let command = this.commands.find(c => c.name === interaction.commandName);
+        let subCommand: SubCommand | undefined;
+        if(command && command.enabled) {
+            let subCommandName = interaction.options.getSubcommand(false);
+            if(subCommandName) {
+                let subCommandGroupName = interaction.options.getSubcommandGroup(false);
+
+                if(subCommandGroupName) {
+                    let subCommandGroup = command.subCommandGroups?.find(c => c.name === subCommandGroupName);
+
+                    if(subCommandGroup) {
+                        if(subCommandGroup.enabled) {
+                            subCommand = subCommandGroup.subCommands.find(c => c.name === subCommandName);
+                        }
+                    }
+                } else {
+                    subCommand = command.subCommands?.find(c => c.name === subCommandName);
+                }
+            }
+
+            let commandOrSubCommand = subCommand ?? command;
+            if(commandOrSubCommand && commandOrSubCommand.enabled) {
+                let option = commandOrSubCommand.options.find(o => o && o.name === interaction.options.getFocused(true).name);
+                if(option && option instanceof StringCommandOption && option.autocomplete) {
+                    option.autocomplete(interaction);
+                }
+            }
+        }
     }
 }

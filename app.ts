@@ -55,6 +55,8 @@ client.on('error', (error) => {
 client.on('interactionCreate', async interaction => {
     if(interaction instanceof Discord.ChatInputCommandInteraction) {
         await CommandManagerAgent.runCommand(interaction);
+    } else if(interaction instanceof Discord.AutocompleteInteraction) {
+        CommandManagerAgent.runAutocomplete(interaction);
     }
 })
 
