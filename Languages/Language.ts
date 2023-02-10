@@ -23,4 +23,10 @@ export default abstract class Language {
     abstract readonly commandNotFound: string;
     abstract readonly commandNotEnabled: string;
     abstract readonly commandNotImplemented: string;
+
+    // System command
+    abstract readonly reloadingConfigurations: string;
+    abstract readonly configurationReloaded: string;
+    abstract readonly settingActivity: string;
+    abstract readonly activitySet: string;
 }

@@ -5,6 +5,7 @@ import SubCommandGroup from "../Models/SubCommandGroup";
 import SubCommand from "../Models/SubCommand";
 import ConfigAgent from "../Agents/ConfigAgent";
 import {StringCommandOption} from "../Models/CommandOption";
+import Language from "../Languages/Language";
 
 export default new MainCommand({
     name: "system",
@@ -49,7 +50,8 @@ export default new MainCommand({
                     ],
                     enabled: true,
                     execute: async (interaction: CommandInteraction) => {
-                        await interaction.reply({content: "Reloading configuration...", ephemeral: true});
+                        let language = Language.language(interaction.locale.toString());
+                        await interaction.reply({content: language.reloadingConfigurations, ephemeral: true});
 
                         ConfigAgent.loadConfig();
 
@@ -63,7 +65,7 @@ export default new MainCommand({
                             ],
                         });
 
-                        await interaction.editReply({content: "Configuration reloaded"});
+                        await interaction.editReply({content: language.configurationReloaded});
                     }
                 })
             ]
@@ -184,7 +186,8 @@ export default new MainCommand({
                         })
                     ],
                     execute: async (interaction: CommandInteraction) => {
-                        await interaction.reply({content: "Setting activity...", ephemeral: true});
+                        let language = Language.language(interaction.locale.toString());
+                        await interaction.reply({content: language.settingActivity, ephemeral: true});
 
                         let activityName = interaction.options.get("name")!.value as string;
                         let activityType = interaction.options.get("type")!.value as string;
@@ -217,7 +220,7 @@ export default new MainCommand({
                             ],
                         });
 
-                        await interaction.editReply({content: "Activity set"});
+                        await interaction.editReply({content: language.activitySet});
                     }
                 })
             ]
