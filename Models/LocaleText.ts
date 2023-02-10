@@ -19,23 +19,16 @@ export default class LocaleText {
         }
     }
 
-    static addNameToSlashBuilder(builder: SharedNameAndDescription, name: LocaleText[] | string) {
-        if(name instanceof Array) {
-            name.forEach(n => {
-                if(n.isLocale(ConfigAgent.getConfig().commands.defaultLocale as LocaleString)) {
-                    builder.setName(n.text);
-                }
-                if(n.locale instanceof Array) {
-                    n.locale.forEach(l => {
-                        builder.setNameLocalization(l, n.text);
-                    });
-                } else {
-                    builder.setNameLocalization(n.locale, n.text);
-                }
-            });
-        } else {
-            builder.setName(name);
-        }
+    static addLocaleNameToSlashBuilder(builder: SharedNameAndDescription, name: LocaleText[]) {
+        name.forEach(n => {
+            if(n.locale instanceof Array) {
+                n.locale.forEach(l => {
+                    builder.setNameLocalization(l, n.text);
+                });
+            } else {
+                builder.setNameLocalization(n.locale, n.text);
+            }
+        });
     }
 
     static addDescriptionToSlashBuilder(builder: SharedNameAndDescription, description: LocaleText[] | string) {
@@ -57,23 +50,16 @@ export default class LocaleText {
         }
     }
 
-    static addNameToOptionChoice(choice: APIApplicationCommandOptionChoice, name: LocaleText[] | string) {
-        if(name instanceof Array) {
-            choice.name_localizations = {};
-            name.forEach(n => {
-                if(n.isLocale(ConfigAgent.getConfig().commands.defaultLocale as LocaleString)) {
-                    choice.name = n.text;
-                }
-                if(n.locale instanceof Array) {
-                    n.locale.forEach(l => {
-                        choice.name_localizations![l] = n.text;
-                    });
-                } else {
-                    choice.name_localizations![n.locale] = n.text
-                }
-            });
-        } else {
-            choice.name = name;
-        }
+    static addLocaleNameToOptionChoice(choice: APIApplicationCommandOptionChoice, name: LocaleText[]) {
+        choice.name_localizations = {};
+        name.forEach(n => {
+            if(n.locale instanceof Array) {
+                n.locale.forEach(l => {
+                    choice.name_localizations![l] = n.text;
+                });
+            } else {
+                choice.name_localizations![n.locale] = n.text
+            }
+        });
     }
 }

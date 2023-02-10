@@ -111,7 +111,8 @@ export default new MainCommand({
                             required: true,
                             choices: [
                                 {
-                                    name: [
+                                    name: "Playing",
+                                    localName: [
                                         new LocaleText({
                                             locale: "fr",
                                             text: "Joue"
@@ -124,7 +125,8 @@ export default new MainCommand({
                                     value: "PLAYING"
                                 },
                                 {
-                                    name: [
+                                    name: "Watching",
+                                    localName: [
                                         new LocaleText({
                                             locale: "fr",
                                             text: "Regarde"
@@ -137,7 +139,8 @@ export default new MainCommand({
                                     value: "WATCHING"
                                 },
                                 {
-                                    name: [
+                                    name: "Listening",
+                                    localName: [
                                         new LocaleText({
                                             locale: "fr",
                                             text: "Écoute"
@@ -150,7 +153,8 @@ export default new MainCommand({
                                     value: "LISTENING"
                                 },
                                 {
-                                    name: [
+                                    name: "Competing",
+                                    localName: [
                                         new LocaleText({
                                             locale: "fr",
                                             text: "Participe"

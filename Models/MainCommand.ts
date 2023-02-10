@@ -11,9 +11,10 @@ export default class MainCommand extends SubCommand {
     readonly subCommandGroups?: SubCommandGroup[];
     readonly subCommands?: SubCommand[];
 
-    constructor(settings: {name: string, description: LocaleText[], enabled: boolean, options?: CommandOption[], execute?: (interaction: CommandInteraction) => Promise<void>, adminOnly?: boolean, subCommandGroups?: SubCommandGroup[], subCommands?: SubCommand[]}) {
+    constructor(settings: {name: string, localeName?: LocaleText[], description: string | LocaleText[], enabled: boolean, options?: CommandOption[], execute?: (interaction: CommandInteraction) => Promise<void>, adminOnly?: boolean, subCommandGroups?: SubCommandGroup[], subCommands?: SubCommand[]}) {
         super({
             name: settings.name,
+            localeName: settings.localeName ?? [],
             description: settings.description,
             enabled: settings.enabled,
             options: settings.options,
@@ -27,11 +28,9 @@ export default class MainCommand extends SubCommand {
     get slashCommandData(): SlashCommandBuilder {
         let data = new SlashCommandBuilder();
 
-        LocaleText.addNameToSlashBuilder(data, this.name);
-        if(data.name === undefined) {
-            winston.error(`Command ${this.name} has no name for locale ${ConfigAgent.getConfig().commands.defaultLocale}`);
-            throw new Error(`No description found for locale ${ConfigAgent.getConfig().commands.defaultLocale}`);
-        }
+        data.setName(this.name);
+        LocaleText.addLocaleNameToSlashBuilder(data, this.localeName);
+
         LocaleText.addDescriptionToSlashBuilder(data, this.description);
         if(this.adminOnly) {
             data.setDefaultMemberPermissions(PermissionsBitField.Flags.Administrator);
