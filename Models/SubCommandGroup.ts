@@ -7,12 +7,14 @@ import * as winston from "winston";
 
 export default class SubCommandGroup {
     readonly name: string;
+    readonly localeName: LocaleText[];
     readonly description: LocaleText[];
     readonly enabled: boolean;
     readonly subCommands: SubCommand[];
 
-    constructor(settings: { name: string, description: LocaleText[], enabled: boolean, subCommands: SubCommand[] }) {
+    constructor(settings: { name: string, localeName?: LocaleText[], description: LocaleText[], enabled: boolean, subCommands: SubCommand[] }) {
         this.name = settings.name;
+        this.localeName = settings.localeName ?? [];
         this.description = settings.description;
         this.enabled = settings.enabled;
         this.subCommands = settings.subCommands;
@@ -22,6 +24,7 @@ export default class SubCommandGroup {
         let data = new SlashCommandSubcommandGroupBuilder();
 
         data.setName(this.name);
+        LocaleText.addLocaleNameToSlashBuilder(data, this.localeName);
         this.description.forEach(d => {
             if(d.isLocale(ConfigAgent.getConfig().commands.defaultLocale as LocaleString)) {
                 data.setDescription(d.text);
